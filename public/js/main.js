@@ -3230,6 +3230,180 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -3257,24 +3431,155 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         text: "Precio de Venta",
         value: "priceSale"
-      }, // { text: "Precio mayorista", value: "priceMinSale" },
-      // { text: "Stock", value: "stock" },
-      {
+      }, {
+        text: "Precio mayorista",
+        value: "priceMinSale"
+      }, {
+        text: "Tipo de precio",
+        value: "typePrice"
+      }, {
+        text: "Stock",
+        value: "stock"
+      }, {
         text: "Cantidad",
         value: "quantity"
       }, {
         text: "Subtotal",
         value: "subtotal"
+      }, {
+        text: "Acciones",
+        value: "actions",
+        sortable: false
       }],
       products: [],
       productSelect: null,
       productsSelected: [],
       loading: false,
       isLoading: false,
-      total: 0
+      total: 0,
+      amount: null,
+      exchange: 0,
+      dialogExchange: false,
+      dialogQuantity: false,
+      quantity: 0,
+      idProduct: 0
     };
   },
   methods: {
+    openDialogQuantity: function openDialogQuantity(item) {
+      this.quantity = item.quantity;
+      this.idProduct = item.id;
+      this.dialogQuantity = true;
+    },
+    saveQuantity: function saveQuantity() {
+      var vm = this;
+      if (vm.dialogExchange === true) return;
+
+      if (vm.quantity === null || vm.quantity === 0 || vm.quantity <= 0 || vm.quantity === "") {
+        vm.$toastr.e("La cantidad debe ser mayor a 0");
+        return;
+      }
+
+      var isExist = vm.productsSelected.findIndex(function (x) {
+        return x.id === vm.idProduct;
+      }); // RECALCULATE AMOUNT
+
+      if (isExist > -1) {
+        vm.productsSelected[isExist].quantity = vm.quantity;
+        vm.productsSelected[isExist].subtotal = vm.parseDecimal(vm.parseDecimal(vm.productsSelected[isExist].quantity) * vm.parseDecimal(vm.productsSelected[isExist].price));
+        vm.calculateTotal();
+        vm.dialogQuantity = false;
+      }
+    },
+    changePrice: function changePrice(item) {
+      var vm = this;
+      var isExist = vm.productsSelected.findIndex(function (x) {
+        return x.id === item.id;
+      });
+
+      if (isExist > -1) {
+        if (vm.productsSelected[isExist].typePrice === 1) {
+          vm.productsSelected[isExist].typePrice = 0;
+          vm.productsSelected[isExist].price = vm.productsSelected[isExist].priceMinSale;
+        } else {
+          vm.productsSelected[isExist].typePrice = 1;
+          vm.productsSelected[isExist].price = vm.productsSelected[isExist].priceSale;
+        } // RECALCULATE AMOUNT
+
+
+        vm.productsSelected[isExist].subtotal = vm.parseDecimal(vm.parseDecimal(vm.productsSelected[isExist].quantity) * vm.parseDecimal(vm.productsSelected[isExist].price));
+        vm.calculateTotal();
+      }
+    },
+    deleteProduct: function deleteProduct(item) {
+      var vm = this;
+      var idProduct = vm.productsSelected.findIndex(function (x) {
+        return x.id === item.id;
+      });
+
+      if (idProduct > -1) {
+        vm.productsSelected.splice(idProduct, 1);
+      }
+    },
+    payment: function payment() {
+      var vm = this;
+      if (vm.dialogQuantity === true) return;
+
+      if (vm.exchange < 0) {
+        vm.$toastr.e("El cambio no puede ser mayor a 0");
+        return;
+      }
+
+      if (vm.amount === null || vm.amount === 0 || vm.amount <= 0 || vm.amount === "") {
+        vm.$toastr.e("El monto debe ser mayor a 0");
+        return;
+      } // SAVE PAYMENT
+
+
+      axios.post('/api/saveSale', {
+        amount: vm.total,
+        exchange: vm.exchange,
+        payment: vm.amount,
+        products: JSON.stringify(vm.products)
+      }).then(function (response) {
+        // console.log(response);
+        vm.$toastr.s(response.data.message);
+        vm.$router.push({
+          path: "/venta/imprimir?id=".concat(response.data.id)
+        });
+      })["catch"](function (error) {
+        // console.log(error);
+        vm.$toastr.e(error.response.data.message);
+      });
+    },
+    calculate: function calculate() {
+      var vm = this;
+
+      if (vm.amount === null || vm.amount === 0 || vm.amount <= 0 || vm.amount === "") {
+        vm.$toastr.e("Para calcular el cambio se debe ingresar un monto");
+        vm.exchange = 0;
+        return;
+      }
+
+      vm.exchange = vm.parseDecimal(vm.parseDecimal(vm.amount) - vm.parseDecimal(vm.total));
+    },
+    calculateExchange: function calculateExchange() {
+      var vm = this;
+      if (vm.dialogExchange === true || vm.dialogQuantity === true) return;
+
+      if (vm.productsSelected.length < 1) {
+        vm.$toastr.e("Para cobrar es necesario tener productos");
+        return;
+      }
+
+      vm.productsSelected.forEach(function (product) {
+        if (product.quantity < 1) {
+          vm.$toastr.e("El producto ".concat(product.name, " debe ser mayor a 0"));
+          return;
+        }
+      });
+      vm.dialogExchange = true; // vm.$refs.amount.focus();
+    },
     customLabel: function customLabel(_ref) {
       var name = _ref.name,
           code = _ref.code;
@@ -3302,12 +3607,12 @@ __webpack_require__.r(__webpack_exports__);
       });
 
       if (isExist < 0) {
-        product.subtotal = vm.parseDecimal(vm.parseDecimal(product.quantity) * vm.parseDecimal(product.priceSale));
+        product.subtotal = vm.parseDecimal(vm.parseDecimal(product.quantity) * vm.parseDecimal(product.price));
         vm.productsSelected.unshift(product);
         vm.calculateTotal();
       } else {
         vm.productsSelected[isExist].quantity += 1;
-        vm.productsSelected[isExist].subtotal = vm.parseDecimal(vm.parseDecimal(vm.productsSelected[isExist].quantity) * vm.parseDecimal(vm.productsSelected[isExist].priceSale));
+        vm.productsSelected[isExist].subtotal = vm.parseDecimal(vm.parseDecimal(vm.productsSelected[isExist].quantity) * vm.parseDecimal(vm.productsSelected[isExist].price));
         vm.calculateTotal();
       }
     },
@@ -3320,7 +3625,6 @@ __webpack_require__.r(__webpack_exports__);
       vm.total = vm.parseDecimal(vm.total);
     },
     onSearch: function onSearch(search) {
-      // console.log(search);
       this.isLoading = true;
       this.search(search, this);
     },
@@ -3341,19 +3645,155 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   created: function created() {
-    window.addEventListener("keydown", function (e) {
-      // if (e.key == "C"||e.key == "c") {
-      //     console.log(e.key);
-      // }
-      if (e.ctrlKey && e.key === 'z') {
-        alert('Undo!');
-      } // console.log(e.key);
+    var _this = this;
 
+    window.addEventListener("keydown", function (e) {
+      if (e.ctrlKey && e.altKey && (e.key === "a" || e.key === "A")) {
+        _this.calculateExchange();
+      }
+
+      if (e.ctrlKey && e.altKey && (e.key === "s" || e.key === "S")) {
+        _this.payment();
+      }
+
+      if (e.ctrlKey && e.altKey && (e.key === "d" || e.key === "D")) {
+        _this.saveQuantity();
+      }
     });
   },
   mounted: function mounted() {
-    this.onSearch();
+    this.onSearch("A");
     this.$refs.selectProduct.$el.focus();
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/src/views/Sale/Print.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/src/views/Sale/Print.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-html-to-paper */ "./node_modules/vue-html-to-paper/dist/index.js");
+/* harmony import */ var vue_html_to_paper__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _utils_eight__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/eight */ "./resources/js/src/utils/eight.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+var options = {
+  name: "_blank",
+  specs: ["fullscreen=yes", "titlebar=no", "scrollbars=no"],
+  styles: ["/css/bootstrap.min.css", "/js/bootstrap.min.js", "/js/jquery.min.js", "/css/voucher.css"]
+};
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_1___default.a, options);
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      idSale: 0,
+      sale: {},
+      products: [],
+      items: [{
+        text: "Inicio",
+        disabled: false,
+        href: "/"
+      }, {
+        text: "Nueva venta",
+        disabled: false,
+        href: "/venta/nuevo"
+      }, {
+        text: "Imprimir venta",
+        disabled: true,
+        href: "/venta/imprimir"
+      }]
+    };
+  },
+  methods: {
+    mymoney: function mymoney(value) {
+      return _utils_eight__WEBPACK_IMPORTED_MODULE_3__["eight"].money(parseFloat(value));
+    },
+    print: function print() {
+      this.$htmlToPaper("printMe");
+    },
+    getData: function getData() {
+      var vm = this;
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/api/getSale/".concat(vm.$route.query.id)).then(function (response) {
+        // console.log(response.data[0);
+        vm.sale = response.data[0].sale;
+        vm.products = response.data[0].products;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    }
+  },
+  mounted: function mounted() {
+    this.getData();
   }
 });
 
@@ -27284,6 +27724,90 @@ var render = function() {
                               }
                             },
                             {
+                              key: "item.priceMinSale",
+                              fn: function(ref) {
+                                var item = ref.item
+                                return [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(_vm.mymoney(item.priceMinSale)) +
+                                      "\n                        "
+                                  )
+                                ]
+                              }
+                            },
+                            {
+                              key: "item.stock",
+                              fn: function(ref) {
+                                var item = ref.item
+                                return [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(_vm.mystock(item.stock)) +
+                                      "\n                        "
+                                  )
+                                ]
+                              }
+                            },
+                            {
+                              key: "item.quantity",
+                              fn: function(ref) {
+                                var item = ref.item
+                                return [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(_vm.mystock(item.quantity)) +
+                                      "\n                        "
+                                  )
+                                ]
+                              }
+                            },
+                            {
+                              key: "item.typePrice",
+                              fn: function(ref) {
+                                var item = ref.item
+                                return [
+                                  item.typePrice === 1
+                                    ? [
+                                        _c(
+                                          "v-chip",
+                                          {
+                                            staticClass: "ma-2",
+                                            attrs: {
+                                              color: "green",
+                                              "text-color": "white",
+                                              label: ""
+                                            }
+                                          },
+                                          [
+                                            _vm._v(
+                                              "\n                                    NORMAL\n                                "
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    : [
+                                        _c(
+                                          "v-chip",
+                                          {
+                                            staticClass: "ma-2",
+                                            attrs: {
+                                              color: "yellow darken-1",
+                                              "text-color": "white",
+                                              label: ""
+                                            }
+                                          },
+                                          [
+                                            _vm._v(
+                                              "\n                                    MAYORISTA\n                                "
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                ]
+                              }
+                            },
+                            {
                               key: "item.subtotal",
                               fn: function(ref) {
                                 var item = ref.item
@@ -27292,6 +27816,178 @@ var render = function() {
                                     "\n                            " +
                                       _vm._s(_vm.mymoney(item.subtotal)) +
                                       "\n                        "
+                                  )
+                                ]
+                              }
+                            },
+                            {
+                              key: "item.actions",
+                              fn: function(ref) {
+                                var item = ref.item
+                                return [
+                                  _c(
+                                    "v-tooltip",
+                                    {
+                                      attrs: { top: "" },
+                                      scopedSlots: _vm._u(
+                                        [
+                                          {
+                                            key: "activator",
+                                            fn: function(ref) {
+                                              var on = ref.on
+                                              var attrs = ref.attrs
+                                              return [
+                                                _c(
+                                                  "v-icon",
+                                                  _vm._g(
+                                                    _vm._b(
+                                                      {
+                                                        staticClass: "mr-2",
+                                                        attrs: { small: "" },
+                                                        on: {
+                                                          click: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.deleteProduct(
+                                                              item
+                                                            )
+                                                          }
+                                                        }
+                                                      },
+                                                      "v-icon",
+                                                      attrs,
+                                                      false
+                                                    ),
+                                                    on
+                                                  ),
+                                                  [
+                                                    _vm._v(
+                                                      "\n                                        mdi-delete\n                                    "
+                                                    )
+                                                  ]
+                                                )
+                                              ]
+                                            }
+                                          }
+                                        ],
+                                        null,
+                                        true
+                                      )
+                                    },
+                                    [
+                                      _vm._v(" "),
+                                      _c("span", [_vm._v("Quitar")])
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-tooltip",
+                                    {
+                                      attrs: { top: "" },
+                                      scopedSlots: _vm._u(
+                                        [
+                                          {
+                                            key: "activator",
+                                            fn: function(ref) {
+                                              var on = ref.on
+                                              var attrs = ref.attrs
+                                              return [
+                                                _c(
+                                                  "v-icon",
+                                                  _vm._g(
+                                                    _vm._b(
+                                                      {
+                                                        staticClass: "mr-2",
+                                                        attrs: { small: "" },
+                                                        on: {
+                                                          click: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.changePrice(
+                                                              item
+                                                            )
+                                                          }
+                                                        }
+                                                      },
+                                                      "v-icon",
+                                                      attrs,
+                                                      false
+                                                    ),
+                                                    on
+                                                  ),
+                                                  [
+                                                    _vm._v(
+                                                      "\n                                        mdi-arrow-left-right\n                                    "
+                                                    )
+                                                  ]
+                                                )
+                                              ]
+                                            }
+                                          }
+                                        ],
+                                        null,
+                                        true
+                                      )
+                                    },
+                                    [
+                                      _vm._v(" "),
+                                      _c("span", [_vm._v("Cambiar precio")])
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-tooltip",
+                                    {
+                                      attrs: { top: "" },
+                                      scopedSlots: _vm._u(
+                                        [
+                                          {
+                                            key: "activator",
+                                            fn: function(ref) {
+                                              var on = ref.on
+                                              var attrs = ref.attrs
+                                              return [
+                                                _c(
+                                                  "v-icon",
+                                                  _vm._g(
+                                                    _vm._b(
+                                                      {
+                                                        staticClass: "mr-2",
+                                                        attrs: { small: "" },
+                                                        on: {
+                                                          click: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.openDialogQuantity(
+                                                              item
+                                                            )
+                                                          }
+                                                        }
+                                                      },
+                                                      "v-icon",
+                                                      attrs,
+                                                      false
+                                                    ),
+                                                    on
+                                                  ),
+                                                  [
+                                                    _vm._v(
+                                                      "\n                                        mdi-cash\n                                    "
+                                                    )
+                                                  ]
+                                                )
+                                              ]
+                                            }
+                                          }
+                                        ],
+                                        null,
+                                        true
+                                      )
+                                    },
+                                    [
+                                      _vm._v(" "),
+                                      _c("span", [_vm._v("Cantidad")])
+                                    ]
                                   )
                                 ]
                               }
@@ -27314,14 +28010,308 @@ var render = function() {
           _c("v-card-text", [
             _c("div", [
               _c("h1", { staticClass: "text-end" }, [
-                _vm._v(_vm._s(_vm.mymoney(_vm.total)))
+                _vm._v("Total: " + _vm._s(_vm.mymoney(_vm.total)))
               ])
             ])
           ]),
           _vm._v(" "),
           _c(
             "v-card-actions",
-            [_c("v-btn", [_vm._v("\n                Cobrar\n            ")])],
+            [
+              _c(
+                "v-btn",
+                {
+                  on: {
+                    click: function($event) {
+                      return _vm.calculateExchange()
+                    }
+                  }
+                },
+                [_vm._v("\n                Cobrar\n            ")]
+              )
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "v-row",
+        { attrs: { justify: "center" } },
+        [
+          _c(
+            "v-dialog",
+            {
+              attrs: {
+                persistent: "",
+                "max-width": "800px",
+                "open-on-focus": true
+              },
+              model: {
+                value: _vm.dialogExchange,
+                callback: function($$v) {
+                  _vm.dialogExchange = $$v
+                },
+                expression: "dialogExchange"
+              }
+            },
+            [
+              _c(
+                "v-card",
+                [
+                  _c("v-card-title", [
+                    _c("span", { staticClass: "headline" }, [
+                      _vm._v("Calcular cambio")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-text",
+                    [
+                      _c(
+                        "v-container",
+                        [
+                          _c(
+                            "v-row",
+                            [
+                              _c("v-col", { attrs: { cols: "12" } }, [
+                                _c("h2", [
+                                  _vm._v(
+                                    "Total: " + _vm._s(_vm.mymoney(_vm.total))
+                                  )
+                                ])
+                              ])
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "v-row",
+                            [
+                              _c(
+                                "v-col",
+                                { attrs: { cols: "12" } },
+                                [
+                                  _c("v-text-field", {
+                                    attrs: {
+                                      label: "Monto",
+                                      required: "",
+                                      type: "number",
+                                      prefix: "Q",
+                                      autofocus: ""
+                                    },
+                                    on: {
+                                      input: function($event) {
+                                        return _vm.calculate()
+                                      },
+                                      blur: function($event) {
+                                        return _vm.calculate()
+                                      }
+                                    },
+                                    model: {
+                                      value: _vm.amount,
+                                      callback: function($$v) {
+                                        _vm.amount = $$v
+                                      },
+                                      expression: "amount"
+                                    }
+                                  })
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "v-row",
+                            [
+                              _c("v-col", { attrs: { cols: "12" } }, [
+                                _c("h2", [
+                                  _vm._v(
+                                    "Cambio: " +
+                                      _vm._s(_vm.mymoney(_vm.exchange))
+                                  )
+                                ])
+                              ])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-actions",
+                    [
+                      _c("v-spacer"),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { color: "blue darken-1", text: "" },
+                          on: {
+                            click: function($event) {
+                              _vm.dialogExchange = false
+                            }
+                          }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancelar\n                    "
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { color: "blue darken-1", text: "" },
+                          on: {
+                            click: function($event) {
+                              return _vm.payment()
+                            }
+                          }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Guardar\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "v-row",
+        { attrs: { justify: "center" } },
+        [
+          _c(
+            "v-dialog",
+            {
+              attrs: {
+                persistent: "",
+                "max-width": "800px",
+                "open-on-focus": true
+              },
+              model: {
+                value: _vm.dialogQuantity,
+                callback: function($$v) {
+                  _vm.dialogQuantity = $$v
+                },
+                expression: "dialogQuantity"
+              }
+            },
+            [
+              _c(
+                "v-card",
+                [
+                  _c("v-card-title", [
+                    _c("span", { staticClass: "headline" }, [
+                      _vm._v("Cambiar cantidad")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-text",
+                    [
+                      _c(
+                        "v-container",
+                        [
+                          _c(
+                            "v-row",
+                            [
+                              _c(
+                                "v-col",
+                                { attrs: { cols: "12" } },
+                                [
+                                  _c("v-text-field", {
+                                    attrs: {
+                                      label: "Cantidad",
+                                      required: "",
+                                      type: "number",
+                                      autofocus: ""
+                                    },
+                                    model: {
+                                      value: _vm.quantity,
+                                      callback: function($$v) {
+                                        _vm.quantity = $$v
+                                      },
+                                      expression: "quantity"
+                                    }
+                                  })
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-actions",
+                    [
+                      _c("v-spacer"),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { color: "blue darken-1", text: "" },
+                          on: {
+                            click: function($event) {
+                              _vm.dialogQuantity = false
+                            }
+                          }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancelar\n                    "
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { color: "blue darken-1", text: "" },
+                          on: {
+                            click: function($event) {
+                              return _vm.saveQuantity()
+                            }
+                          }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Guardar\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            ],
             1
           )
         ],
@@ -27332,6 +28322,140 @@ var render = function() {
   )
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/src/views/Sale/Print.vue?vue&type=template&id=d4745a22&":
+/*!************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/src/views/Sale/Print.vue?vue&type=template&id=d4745a22& ***!
+  \************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    [
+      _c("v-breadcrumbs", {
+        attrs: { items: _vm.items },
+        scopedSlots: _vm._u([
+          {
+            key: "divider",
+            fn: function() {
+              return [_c("v-icon", [_vm._v("mdi-forward")])]
+            },
+            proxy: true
+          }
+        ])
+      }),
+      _vm._v(" "),
+      _c("div", { attrs: { id: "printMe" } }, [
+        _c("div", { staticClass: "ticket" }, [
+          _c("img", { attrs: { src: "/img/VOCHER.jpg", alt: "Logotipo" } }),
+          _vm._v(" "),
+          _c("table", [
+            _vm._m(0),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.products, function(product) {
+                return _c("tr", { key: product.id }, [
+                  _c("td", [_vm._v(_vm._s(product.quantity))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(product.name))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(product.subtotal))])
+                ])
+              }),
+              0
+            ),
+            _vm._v(" "),
+            _c("tfoot", [
+              _c("tr", [
+                _c("td", [_vm._v("TOTAL")]),
+                _vm._v(" "),
+                _c(
+                  "td",
+                  { staticClass: "text-right", attrs: { colspan: "2" } },
+                  [_vm._v(_vm._s(_vm.mymoney(_vm.sale.amount)))]
+                )
+              ]),
+              _vm._v(" "),
+              _c("tr", [
+                _c("td", [_vm._v("PAGADO")]),
+                _vm._v(" "),
+                _c(
+                  "td",
+                  { staticClass: "text-right", attrs: { colspan: "2" } },
+                  [_vm._v(_vm._s(_vm.mymoney(_vm.sale.payment)))]
+                )
+              ]),
+              _vm._v(" "),
+              _c("tr", [
+                _c("td", [_vm._v("CAMBIO")]),
+                _vm._v(" "),
+                _c(
+                  "td",
+                  { staticClass: "text-right", attrs: { colspan: "2" } },
+                  [_vm._v(_vm._s(_vm.mymoney(_vm.sale.exchange)))]
+                )
+              ])
+            ])
+          ]),
+          _vm._v(" "),
+          _vm._m(1)
+        ])
+      ]),
+      _vm._v(" "),
+      _c(
+        "v-btn",
+        {
+          staticClass: "mr-4",
+          attrs: { color: "teal" },
+          on: { click: _vm.print }
+        },
+        [_vm._v("\n        imprimir\n    ")]
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("CANT")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("PRODUCTO")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("QQ")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("p", { staticClass: "centrado" }, [
+      _vm._v("\n                ¡GRACIAS POR SU COMPRA!"),
+      _c("br"),
+      _vm._v("eight-software.tk\n            ")
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -90237,6 +91361,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _views_Product_Edit_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../views/Product/Edit.vue */ "./resources/js/src/views/Product/Edit.vue");
 /* harmony import */ var _views_Product_Print_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../views/Product/Print.vue */ "./resources/js/src/views/Product/Print.vue");
 /* harmony import */ var _views_Sale_New_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../views/Sale/New.vue */ "./resources/js/src/views/Sale/New.vue");
+/* harmony import */ var _views_Sale_Print_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../views/Sale/Print.vue */ "./resources/js/src/views/Sale/Print.vue");
+
 
 
 
@@ -90270,6 +91396,10 @@ var routes = [{
   path: '/producto/imprimir',
   name: 'ImprimirCodigo',
   component: _views_Product_Print_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
+}, {
+  path: '/venta/imprimir',
+  name: 'ImprimirVenta',
+  component: _views_Sale_Print_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
 }, {
   path: '/about',
   name: 'About',
@@ -90709,6 +91839,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_New_vue_vue_type_template_id_67861ae2___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_New_vue_vue_type_template_id_67861ae2___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/src/views/Sale/Print.vue":
+/*!***********************************************!*\
+  !*** ./resources/js/src/views/Sale/Print.vue ***!
+  \***********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Print_vue_vue_type_template_id_d4745a22___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Print.vue?vue&type=template&id=d4745a22& */ "./resources/js/src/views/Sale/Print.vue?vue&type=template&id=d4745a22&");
+/* harmony import */ var _Print_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Print.vue?vue&type=script&lang=js& */ "./resources/js/src/views/Sale/Print.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Print_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Print_vue_vue_type_template_id_d4745a22___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Print_vue_vue_type_template_id_d4745a22___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/src/views/Sale/Print.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/src/views/Sale/Print.vue?vue&type=script&lang=js&":
+/*!************************************************************************!*\
+  !*** ./resources/js/src/views/Sale/Print.vue?vue&type=script&lang=js& ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Print_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Print.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/src/views/Sale/Print.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Print_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/src/views/Sale/Print.vue?vue&type=template&id=d4745a22&":
+/*!******************************************************************************!*\
+  !*** ./resources/js/src/views/Sale/Print.vue?vue&type=template&id=d4745a22& ***!
+  \******************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Print_vue_vue_type_template_id_d4745a22___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Print.vue?vue&type=template&id=d4745a22& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/src/views/Sale/Print.vue?vue&type=template&id=d4745a22&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Print_vue_vue_type_template_id_d4745a22___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Print_vue_vue_type_template_id_d4745a22___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

@@ -20,3 +20,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::resource('products','\App\Http\Controllers\ProductController');
 Route::get('getProducts',['\App\Http\Controllers\ProductController','getProducts']);
+Route::post('saveSale',['\App\Http\Controllers\SaleController','save']);
+Route::get('getSale/{id}',['\App\Http\Controllers\SaleController','get']);

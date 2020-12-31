@@ -111,7 +111,7 @@ class ProductController extends Controller
      */
     public function getProducts(Request $request){
         $search = explode(" ",$request->filter);
-        return Product::select('id','name','priceSale','priceMinSale','code','stock',DB::raw('1 as quantity'),DB::raw('0 as subtotal'))
+        return Product::select('id','name','priceSale','priceMinSale','code','stock',DB::raw('1 as quantity'),DB::raw('0 as subtotal'),DB::raw('priceSale as price'),DB::raw('1 as typePrice'))
             ->where(function($query) use($search){
                 foreach($search as $item){
                     $query->where('name','like','%'.$item.'%')

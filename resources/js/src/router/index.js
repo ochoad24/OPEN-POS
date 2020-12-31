@@ -6,6 +6,7 @@ import NewProduct from '../views/Product/New.vue'
 import EditProduct from '../views/Product/Edit.vue'
 import PrintProductCode from '../views/Product/Print.vue'
 import NewSale from '../views/Sale/New.vue'
+import PrintSale from '../views/Sale/Print.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -38,6 +39,11 @@ const routes = [
     path: '/producto/imprimir',
     name: 'ImprimirCodigo',
     component: PrintProductCode
+  },
+  {
+    path: '/venta/imprimir',
+    name: 'ImprimirVenta',
+    component: PrintSale
   },
   {
     path: '/about',
