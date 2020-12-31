@@ -10,39 +10,44 @@
         <div id="printMe">
             <div class="ticket">
                 <img
-                    src="/img/VOCHER.jpg"
-                    alt="Logotipo"
-                />
-                <!-- <p class="centrado">
-                    TICKET DE VENTA<br />New New York<br />17/10/2017 02:22 a.m.
-                </p> -->
+                src="/img/VOCHER.jpg"
+                alt="Logotipo"/>
+                <p class="centrado">
+                    TICKET DE VENTA
+                </p>
                 <table>
                     <thead>
                         <tr>
-                            <th>CANT</th>
-                            <th>PRODUCTO</th>
-                            <th>QQ</th>
+                            <th class="cantidad">CANT</th>
+                            <th class="producto">PROD</th>
+                            <th class="precio">Q</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="product in products" :key="product.id">
-                            <td>{{product.quantity}}</td>
-                            <td>{{product.name}}</td>
-                            <td>{{product.subtotal}}</td>
+                            <td class="cantidad">{{ product.quantity }}</td>
+                            <td class="producto">{{ product.name }}</td>
+                            <td class="precio">{{ product.subtotal }}</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td>TOTAL</td>
-                            <td colspan="2" class="text-right">{{mymoney(sale.amount)}}</td>
+                            <td colspan="2" class="text-right">
+                                {{ mymoney(sale.amount) }}
+                            </td>
                         </tr>
                         <tr>
                             <td>PAGADO</td>
-                            <td colspan="2" class="text-right">{{mymoney(sale.payment)}}</td>
+                            <td colspan="2" class="text-right">
+                                {{ mymoney(sale.payment) }}
+                            </td>
                         </tr>
                         <tr>
                             <td>CAMBIO</td>
-                            <td colspan="2" class="text-right">{{mymoney(sale.exchange)}}</td>
+                            <td colspan="2" class="text-right">
+                                {{ mymoney(sale.exchange) }}
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
@@ -65,20 +70,15 @@ import { eight } from "../../utils/eight";
 const options = {
     name: "_blank",
     specs: ["fullscreen=yes", "titlebar=no", "scrollbars=no"],
-    styles: [
-        "/css/bootstrap.min.css",
-        "/js/bootstrap.min.js",
-        "/js/jquery.min.js",
-        "/css/voucher.css"
-    ]
+    styles: ["/css/voucher.css"]
 };
 
 Vue.use(VueHtmlToPaper, options);
 export default {
     data: () => ({
         idSale: 0,
-        sale:{},
-        products:[],
+        sale: {},
+        products: [],
         items: [
             {
                 text: "Inicio",
@@ -104,17 +104,19 @@ export default {
         print() {
             this.$htmlToPaper("printMe");
         },
-        getData(){
-            let vm=this;
-            axios.get(`/api/getSale/${vm.$route.query.id}`)
-                .then((response)=>{
+        getData() {
+            let vm = this;
+            axios
+                .get(`/api/getSale/${vm.$route.query.id}`)
+                .then(response => {
                     // console.log(response.data[0);
-                    vm.sale=response.data[0].sale;
-                    vm.products=response.data[0].products;
-                }).catch((error)=>{
-                    console.log(error);
+                    vm.sale = response.data[0].sale;
+                    vm.products = response.data[0].products;
                 })
-        },
+                .catch(error => {
+                    console.log(error);
+                });
+        }
     },
     mounted() {
         this.getData();

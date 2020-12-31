@@ -370,6 +370,7 @@ export default {
             if (idProduct > -1) {
                 vm.productsSelected.splice(idProduct, 1);
             }
+            vm.calculateTotal();
         },
         payment() {
             let vm = this;
@@ -393,7 +394,7 @@ export default {
                 amount:vm.total,
                 exchange:vm.exchange,
                 payment:vm.amount,
-                products: JSON.stringify(vm.products)
+                products: JSON.stringify(vm.productsSelected)
             }).then((response)=>{
                 // console.log(response);
                 vm.$toastr.s(response.data.message);

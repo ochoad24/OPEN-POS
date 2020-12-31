@@ -3520,6 +3520,8 @@ __webpack_require__.r(__webpack_exports__);
       if (idProduct > -1) {
         vm.productsSelected.splice(idProduct, 1);
       }
+
+      vm.calculateTotal();
     },
     payment: function payment() {
       var vm = this;
@@ -3540,7 +3542,7 @@ __webpack_require__.r(__webpack_exports__);
         amount: vm.total,
         exchange: vm.exchange,
         payment: vm.amount,
-        products: JSON.stringify(vm.products)
+        products: JSON.stringify(vm.productsSelected)
       }).then(function (response) {
         // console.log(response);
         vm.$toastr.s(response.data.message);
@@ -3743,6 +3745,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 
@@ -3750,7 +3757,7 @@ __webpack_require__.r(__webpack_exports__);
 var options = {
   name: "_blank",
   specs: ["fullscreen=yes", "titlebar=no", "scrollbars=no"],
-  styles: ["/css/bootstrap.min.css", "/js/bootstrap.min.js", "/js/jquery.min.js", "/css/voucher.css"]
+  styles: ["/css/voucher.css"]
 };
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_html_to_paper__WEBPACK_IMPORTED_MODULE_1___default.a, options);
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -28363,6 +28370,10 @@ var render = function() {
         _c("div", { staticClass: "ticket" }, [
           _c("img", { attrs: { src: "/img/VOCHER.jpg", alt: "Logotipo" } }),
           _vm._v(" "),
+          _c("p", { staticClass: "centrado" }, [
+            _vm._v("\n                TICKET DE VENTA\n            ")
+          ]),
+          _vm._v(" "),
           _c("table", [
             _vm._m(0),
             _vm._v(" "),
@@ -28370,11 +28381,17 @@ var render = function() {
               "tbody",
               _vm._l(_vm.products, function(product) {
                 return _c("tr", { key: product.id }, [
-                  _c("td", [_vm._v(_vm._s(product.quantity))]),
+                  _c("td", { staticClass: "cantidad" }, [
+                    _vm._v(_vm._s(product.quantity))
+                  ]),
                   _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(product.name))]),
+                  _c("td", { staticClass: "producto" }, [
+                    _vm._v(_vm._s(product.name))
+                  ]),
                   _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(product.subtotal))])
+                  _c("td", { staticClass: "precio" }, [
+                    _vm._v(_vm._s(product.subtotal))
+                  ])
                 ])
               }),
               0
@@ -28387,7 +28404,13 @@ var render = function() {
                 _c(
                   "td",
                   { staticClass: "text-right", attrs: { colspan: "2" } },
-                  [_vm._v(_vm._s(_vm.mymoney(_vm.sale.amount)))]
+                  [
+                    _vm._v(
+                      "\n                            " +
+                        _vm._s(_vm.mymoney(_vm.sale.amount)) +
+                        "\n                        "
+                    )
+                  ]
                 )
               ]),
               _vm._v(" "),
@@ -28397,7 +28420,13 @@ var render = function() {
                 _c(
                   "td",
                   { staticClass: "text-right", attrs: { colspan: "2" } },
-                  [_vm._v(_vm._s(_vm.mymoney(_vm.sale.payment)))]
+                  [
+                    _vm._v(
+                      "\n                            " +
+                        _vm._s(_vm.mymoney(_vm.sale.payment)) +
+                        "\n                        "
+                    )
+                  ]
                 )
               ]),
               _vm._v(" "),
@@ -28407,7 +28436,13 @@ var render = function() {
                 _c(
                   "td",
                   { staticClass: "text-right", attrs: { colspan: "2" } },
-                  [_vm._v(_vm._s(_vm.mymoney(_vm.sale.exchange)))]
+                  [
+                    _vm._v(
+                      "\n                            " +
+                        _vm._s(_vm.mymoney(_vm.sale.exchange)) +
+                        "\n                        "
+                    )
+                  ]
                 )
               ])
             ])
@@ -28437,11 +28472,11 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
-        _c("th", [_vm._v("CANT")]),
+        _c("th", { staticClass: "cantidad" }, [_vm._v("CANT")]),
         _vm._v(" "),
-        _c("th", [_vm._v("PRODUCTO")]),
+        _c("th", { staticClass: "producto" }, [_vm._v("PROD")]),
         _vm._v(" "),
-        _c("th", [_vm._v("QQ")])
+        _c("th", { staticClass: "precio" }, [_vm._v("Q")])
       ])
     ])
   },
