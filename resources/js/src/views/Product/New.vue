@@ -132,6 +132,16 @@
           </v-row>
           <v-row>
             <v-col cols="4">
+              <v-subheader>Código</v-subheader>
+            </v-col>
+            <v-col cols="8">
+              <v-text-field
+                v-model="code"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="4">
               <v-subheader>Descripción</v-subheader>
             </v-col>
             <v-col cols="8">

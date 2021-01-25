@@ -2882,6 +2882,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -3140,6 +3150,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _utils_eight__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/eight */ "./resources/js/src/utils/eight.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -26123,7 +26143,7 @@ var render = function() {
       _c(
         "v-app-bar",
         { attrs: { app: "", color: "teal darken-4", dense: "", dark: "" } },
-        [_c("v-toolbar-title", [_vm._v("Cohetería Don Reyes")])],
+        [_c("v-toolbar-title", [_vm._v("EIGHT POS")])],
         1
       ),
       _vm._v(" "),
@@ -27411,6 +27431,36 @@ var render = function() {
                     _c(
                       "v-col",
                       { attrs: { cols: "4" } },
+                      [_c("v-subheader", [_vm._v("Código")])],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "v-col",
+                      { attrs: { cols: "8" } },
+                      [
+                        _c("v-text-field", {
+                          model: {
+                            value: _vm.code,
+                            callback: function($$v) {
+                              _vm.code = $$v
+                            },
+                            expression: "code"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "v-row",
+                  [
+                    _c(
+                      "v-col",
+                      { attrs: { cols: "4" } },
                       [_c("v-subheader", [_vm._v("Descripción")])],
                       1
                     ),
@@ -27701,6 +27751,26 @@ var render = function() {
                 1
               ),
               _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
               _c(
                 "v-row",
                 [
@@ -27749,7 +27819,7 @@ var render = function() {
                                 var item = ref.item
                                 return [
                                   _vm._v(
-                                    "\n                            " +
+                                    "     \n                            " +
                                       _vm._s(_vm.mystock(item.stock)) +
                                       "\n                        "
                                   )

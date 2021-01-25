@@ -50,6 +50,16 @@
                         </vue-multiselect>
                     </v-col>
                 </v-row>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
                 <v-row>
                     <v-col cols="12">
                         <v-data-table
@@ -64,7 +74,7 @@
                             <template v-slot:[`item.priceMinSale`]="{ item }">
                                 {{ mymoney(item.priceMinSale) }}
                             </template>
-                            <template v-slot:[`item.stock`]="{ item }">
+                            <template v-slot:[`item.stock`]="{ item }" :class="item.stock<=0?'red':'green'">     
                                 {{ mystock(item.stock) }}
                             </template>
                             <template v-slot:[`item.quantity`]="{ item }">

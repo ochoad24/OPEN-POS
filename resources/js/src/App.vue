@@ -25,7 +25,7 @@
 
         <v-app-bar app color="teal darken-4" dense dark>
             <!-- BEGIN NAVBAR -->
-            <v-toolbar-title>Cohetería Don Reyes</v-toolbar-title>
+            <v-toolbar-title>EIGHT POS</v-toolbar-title>
             <!-- END NAVBAR -->
         </v-app-bar>
 
